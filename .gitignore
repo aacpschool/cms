@@ -16,3 +16,7 @@ log/
 codecov/
 .dev/
 test_logs/
+/usr/local/etc/cms.conf
+/usr/local/etc/cms.ranking.conf
+.env
+secrets.json
