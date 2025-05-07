@@ -68,6 +68,7 @@ class Contest(Base):
         default=["C++17 / g++"])
 
     # Whether contesload_allowed = Column(
+    submissions_download_allowed = Column(
         Boolean,
         nullable=False,
         default=True)
@@ -149,9 +150,9 @@ class Contest(Base):
     # the same user (on any task).
     token_min_interval = Column(
         Interval,
-        CheckConstraint("token_min_interval >= '0 seconds'"),
+        CheckConstraint("token_min_interval >= '60 seconds'"),
         nullable=False,
-        default=timedelta())
+        default=timedelta(seconds=60))
 
     # The parameters that control generation (if mode is "finite"):
     # the user starts with "initial" tokens and receives "number" more
