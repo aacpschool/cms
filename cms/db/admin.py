@@ -18,6 +18,8 @@
 
 """Admin-related database interfaces for SQLAlchemy.
 
+zh: 管理員相關的資料庫介面定義。
+en: Database interfaces for contest administrators.
 """
 
 from sqlalchemy.schema import Column
@@ -27,38 +29,46 @@ from . import Codename, Base
 
 
 class Admin(Base):
-    """Class to store information for a person able to access AWS.
+    """Admin table.
 
-    An enabled account always has read access to all of AWS. For
-    changing data and perform actions, additional permission bits
-    need to be set.
-
+    zh: 儲存可存取管理後台的管理員帳號資訊。
+    en: Stores information for users who can access the AdminWebServer.
     """
 
     __tablename__ = 'admins'
 
+    # zh: 自增主鍵
+    # en: Auto increment primary key.
     # Auto increment primary key.
     id = Column(
         Integer,
         primary_key=True)
 
+    # zh: 使用者真實姓名
+    # en: Real name of the administrator.
     # Real name (human readable) of the user.
     name = Column(
         Unicode,
         nullable=False)
 
+    # zh: 登入 AWS 時使用的帳號名稱
+    # en: Username used to log in to the AdminWebServer.
     # Username used to log in in AWS.
     username = Column(
         Codename,
         nullable=False,
         unique=True)
 
+    # zh: 驗證字串，格式 <類型>:<字串>
+    # en: Authentication string in the format <type>:<string>.
     # String used to authenticate the user, in the format
     # <authentication type>:<authentication_string>
     authentication = Column(
         Unicode,
         nullable=False)
 
+    # zh: 帳號是否啟用；停用帳號將被視為不存在
+    # en: Whether the account is enabled; disabled accounts are inactive.
     # Whether the account is enabled. Disabled accounts have their
     # info kept in the database, but for all other purposes it is like
     # they did not exist.
@@ -67,6 +77,8 @@ class Admin(Base):
         nullable=False,
         default=True)
 
+    # zh: 全域存取權限；擁有此權限可執行所有操作
+    # en: All-access bit; grants permission to perform any operation.
     # All-access bit. If this is set, the admin can do any operation
     # in AWS, regardless of the value of the other access bits.
     permission_all = Column(
@@ -74,6 +86,8 @@ class Admin(Base):
         nullable=False,
         default=False)
 
+    # zh: 訊息存取權限；可發布公告與私訊參賽者
+    # en: Messaging-access bit; allows sending announcements and private messages.
     # Messaging-access bit. If this is set, the admin can communicate
     # with the contestants via announcement, private messages and
     # questions.

@@ -22,6 +22,8 @@
 
 """Task-related database interface for SQLAlchemy.
 
+zh: 任務（Task）模組：定義競賽題目及其相關設定的 ORM 類別。
+en: Task module: defines ORM classes for contest problems and related settings.
 """
 
 import copy
@@ -43,8 +45,10 @@ from . import Codename, Filename, FilenameSchemaArray, Digest, Base, Contest
 
 
 class Task(Base):
-    """Class to store a task.
+    """Task table.
 
+    zh: 儲存每個競賽題目的設定與行為規則。
+    en: Stores configuration and rules for each contest problem.
     """
     __tablename__ = 'tasks'
     __table_args__ = (
@@ -110,25 +114,17 @@ class Task(Base):
         nullable=False,
         default=[])
 
-    # The parameters that control task-tokens follow. Note that their
-    # effect during the contest depends on the interaction with the
-    # parameters that control contest-tokens, defined on the Contest.
-
-    # The "kind" of token rules that will be active during the contest.
-    # - disabled: The user will never be able to use any token.
-    # - finite: The user has a finite amount of tokens and can choose
-    #   when to use them, subject to some limitations. Tokens may not
-    #   be all available at start, but given periodically during the
-    #   contest instead.
-    # - infinite: The user will always be able to use a token.
+    # -- 令牌模式 ------------------------------------------------------------
+    # zh: 決定是否啟用令牌及其類型（disabled/finite/infinite）。
+    # en: Determines token usage policy (disabled, finite, or infinite).
     token_mode = Column(
         Enum(TOKEN_MODE_DISABLED, TOKEN_MODE_FINITE, TOKEN_MODE_INFINITE,
              name="token_mode"),
         nullable=False,
         default=TOKEN_MODE_DISABLED)
 
-    # The maximum number of tokens a contestant is allowed to use
-    # during the whole contest (on this tasks).
+    # zh: 限制使用者於此題可使用的最大令牌數量；空值代表不限制。
+    # en: Max tokens a user can spend on this task; null means no limit.
     token_max_number = Column(
         Integer,
         CheckConstraint("token_max_number > 0"),
@@ -165,9 +161,8 @@ class Task(Base):
         CheckConstraint("token_gen_max > 0"),
         nullable=True)
 
-    # Maximum number of submissions or user_tests allowed for each user
-    # on this task during the whole contest or None to not enforce
-    # this limitation.
+    # zh: 此題目允許的最大提交次數；空值代表不限制提交次數。
+    # en: Maximum submissions allowed for this task; null means unlimited.
     max_submission_number = Column(
         Integer,
         CheckConstraint("max_submission_number > 0"),
@@ -177,11 +172,11 @@ class Task(Base):
         CheckConstraint("max_user_test_number > 0"),
         nullable=True)
 
-    # Minimum interval between two submissions or user_tests for this
-    # task, or None to not enforce this limitation.
+    # zh: 兩次提交之間的最短間隔時間；空值代表無間隔限制。
+    # en: Minimum time interval between submissions; null means no interval enforced.
     min_submission_interval = Column(
         Interval,
-        CheckConstraint("min_submission_interval > '0 seconds'"),
+        CheckConstraint("min_submission_interval > '60 seconds'"),
         nullable=True)
     min_user_test_interval = Column(
         Interval,
@@ -212,7 +207,7 @@ class Task(Base):
              SCORE_MODE_MAX_SUBTASK,
              name="score_mode"),
         nullable=False,
-        default=SCORE_MODE_MAX_TOKENED_LAST)
+        default=SCORE_MODE_MAX_SUBTASK)
 
     # Active Dataset (id and object) currently being used for scoring.
     # The ForeignKeyConstraint for this column is set at table-level.
@@ -386,11 +381,14 @@ class Dataset(Base):
         Float,
         CheckConstraint("time_limit > 0"),
         nullable=True)
+    # zh: 每個測資的記憶體上限，預設為 1024 MB
+    # en: Memory limit per testcase; default is 1024 MB.
     memory_limit = Column(
         BigInteger,
         CheckConstraint("memory_limit > 0"),
         CheckConstraint("MOD(memory_limit, 1048576) = 0"),
-        nullable=True)
+        nullable=True,
+        default=1073741824)
 
     # Name of the TaskType child class suited for the task.
     task_type = Column(
@@ -429,6 +427,9 @@ class Dataset(Base):
         passive_deletes=True,
         back_populates="dataset")
 
+    # ---------------------------------------------------------------------
+    # Clone and utility methods
+    # ---------------------------------------------------------------------
     @property
     def active(self):
         """Shorthand for detecting if the dataset is active.

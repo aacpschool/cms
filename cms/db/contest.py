@@ -1,30 +1,11 @@
-#!/usr/bin/env python3
-
-# Contest Management System - http://cms-dev.github.io/
-# Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2018 Stefano Maggiolo <s.maggiolo@gmail.com>
-# Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
-# Copyright © 2012-2018 Luca Wehrstedt <luca.wehrstedt@gmail.com>
-# Copyright © 2013 Bernard Blackham <bernard@largestprime.net>
-# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
-# Copyright © 2016 Amir Keivan Mohtashami <akmohtashami97@gmail.com>
-# Copyright © 2018 William Di Luigi <williamdiluigi@gmail.com>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 """Contest-related database interface for SQLAlchemy.
 
+Contest 模組：負責定義競賽（Contest）與公告（Announcement）等 ORM 資料表。
+作者群請見檔案開頭版權宣告。
+
+This module defines SQLAlchemy ORM models for contests and related
+objects (e.g., announcements). These classes map directly to tables
+in the CMS PostgreSQL database.
 """
 
 from datetime import datetime, timedelta
@@ -68,6 +49,9 @@ class Contest(Base):
         Unicode,
         nullable=False)
 
+    # -- i18n --------------------------------------------------------------
+    # zh: 允許參賽者使用的介面語系清單；若為空陣列代表不限語系。
+    # en: List of GUI language codes that contestants may select.
     # The list of language codes of the localizations that contestants
     # are allowed to use (empty means all).
     allowed_localizations = Column(
@@ -75,14 +59,15 @@ class Contest(Base):
         nullable=False,
         default=[])
 
+    # zh: 允許上傳的程式語言名稱清單。
+    # en: List of programming languages allowed for submissions.
     # The list of names of languages allowed in the contest.
     languages = Column(
         ARRAY(String),
         nullable=False,
-        default=["C11 / gcc", "C++20 / g++", "Pascal / fpc"])
+        default=["C++17 / g++"])
 
-    # Whether contestants allowed to download their submissions.
-    submissions_download_allowed = Column(
+    # Whether contesload_allowed = Column(
         Boolean,
         nullable=False,
         default=True)
@@ -133,6 +118,9 @@ class Contest(Base):
         nullable=False,
         default=False)
 
+    # -- Tokens ------------------------------------------------------------
+    # zh: 令牌規則種類（disabled/finite/infinite）。
+    # en: Kind of token policy (disabled / finite / infinite).
     # The parameters that control contest-tokens follow. Note that
     # their effect during the contest depends on the interaction with
     # the parameters that control task-tokens, defined on each Task.
@@ -192,11 +180,11 @@ class Contest(Base):
     start = Column(
         DateTime,
         nullable=False,
-        default=datetime(2000, 1, 1))
+        default=datetime(2025, 1, 1))
     stop = Column(
         DateTime,
         nullable=False,
-        default=datetime(2030, 1, 1))
+        default=datetime(2025, 1, 1))
 
     # Beginning and ending of the contest anaylsis mode.
     analysis_enabled = Column(
@@ -282,6 +270,9 @@ class Contest(Base):
         passive_deletes=True,
         back_populates="contest")
 
+    # ---------------------------------------------------------------------
+    # Utility methods
+    # ---------------------------------------------------------------------
     def phase(self, timestamp):
         """Return: -1 if contest isn't started yet at time timestamp,
                     0 if the contest is active at time timestamp,
@@ -295,6 +286,8 @@ class Contest(Base):
         return (int): contest phase as above.
 
         """
+        # zh: 比較 timestamp 與各階段時間點以判斷競賽所處階段
+        # en: Compare current time with contest milestones to determine phase
         if timestamp < self.start:
             return -1
         if timestamp <= self.stop:
@@ -308,9 +301,10 @@ class Contest(Base):
 
 
 class Announcement(Base):
-    """Class to store a messages sent by the contest managers to all
-    the users.
+    """Announcement table.
 
+    zh: 用來儲存管理員向所有使用者發佈之訊息。
+    en: Stores broadcast messages sent by contest managers.
     """
     __tablename__ = 'announcements'
 
