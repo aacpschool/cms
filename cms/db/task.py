@@ -388,7 +388,7 @@ class Dataset(Base):
         CheckConstraint("memory_limit > 0"),
         CheckConstraint("MOD(memory_limit, 1048576) = 0"),
         nullable=True,
-        default=1073741824)
+        default=1024)
 
     # Name of the TaskType child class suited for the task.
     task_type = Column(
