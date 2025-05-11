@@ -270,7 +270,8 @@ class Contest(Base):
     min_submission_interval = Column(
         Interval,
         CheckConstraint("min_submission_interval > '60 seconds'"),
-        nullable=True)
+        nullable=False,
+        default=60)
     min_user_test_interval = Column(
         Interval,
         CheckConstraint("min_user_test_interval > '0 seconds'"),
