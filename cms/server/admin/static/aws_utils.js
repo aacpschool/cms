@@ -223,7 +223,7 @@ CMS.AWSUtils.prototype.desktop_notification = function(type, timestamp,
     if (Notification.permission === "granted") {
         new Notification(subject, {
             "body": text,
-            "icon": this.url("static", "favicon.ico")
+            "icon": this.url("static", "favicon_aacp.ico")
         });
     }
 };
